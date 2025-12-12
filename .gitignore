@@ -1,4 +1,4 @@
 /vendor
 .env
-db.php
+includes/db.php
 .DS_Store

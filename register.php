@@ -52,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Registo - K-Dream Budgeter</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://fav.farm/🇰🇷" />
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
 <body class="bg-gray-900 text-white h-screen flex items-center justify-center p-4">

@@ -1,0 +1,20 @@
+RewriteEngine On
+
+# 1. Impede que as pessoas vejam a lista de ficheiros se entrarem numa pasta
+Options -Indexes
+
+# 2. Força HTTPS (opcional para localhost, mas bom para produção)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 3. Remove a extensão .php do URL
+# Se o browser pedir "/squad", o servidor vai buscar "squad.php" internamente
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# 4. Protege ficheiros sensíveis (ninguém pode ver o teu ficheiro de base de dados pelo browser)
+<Files "includes/db.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
