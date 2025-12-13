@@ -3,7 +3,7 @@
 > A Gamified Personal Finance & Squad Goals App.
 > Built to help Gen-Z track expenses and save for shared dreams (like a trip to Korea).
 
-![K-Dream Dashboard](https://via.placeholder.com/800x400?text=Insert+Dashboard+Screenshot+Here)
+![Dashboard](screenshots/dashboard.jpg)
 
 ## 🚀 About the Project
 K-Dream is not just a budget tracker; it's a social financial tool. It allows users to track personal finances while contributing to a shared "Squad Goal".
@@ -42,7 +42,7 @@ Developed as a **Full Stack** project running on a **Home Lab (Linux Server)** u
 ## 📸 Screenshots
 | Dashboard (Light Mode) | Squad Chat |
 |:---:|:---:|
-| ![Dash](link_to_image_1) | ![Squad](link_to_image_2) |
+| ![Dash](screenshots/Dashboard.jpg) | ![Squad](screenshots/Squad_hub.jpg) |
 
 ---
 *Developed by **Vicius** 🏎️*
