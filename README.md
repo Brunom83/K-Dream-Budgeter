@@ -3,7 +3,7 @@
 > A Gamified Personal Finance & Squad Goals App.
 > Built to help Gen-Z track expenses and save for shared dreams (like a trip to Korea).
 
-![Dashboard](screenshots/dashboard.jpg)
+![Login](screenshots/Login.jpg)
 
 ## 🚀 About the Project
 K-Dream is not just a budget tracker; it's a social financial tool. It allows users to track personal finances while contributing to a shared "Squad Goal".
