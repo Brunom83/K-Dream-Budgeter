@@ -26,10 +26,15 @@ function getEurToKrwRate($pdo) {
 }
 
 // Configurar Cookies de Sessão para serem mais permissivos entre domínios
-// (Coloca isto antes de session_start() em qualquer ficheiro, ou aqui se incluíres o db.php sempre antes)
+// Só aplica configurações se a sessão ainda não estiver ativa
+if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_secure', 1); // Força cookie seguro se estiveres em HTTPS
+    // Verifica se estamos em HTTPS (Cloudflare) antes de forçar cookie seguro
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+        ini_set('session.cookie_secure', 1);
+    }
+}
 
     // 2. Se não temos cache recente, vamos à API externa
     // API Free: frankfurter.app (Não precisa de chave API, é top para MVPs)
