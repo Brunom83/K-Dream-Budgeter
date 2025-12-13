@@ -40,7 +40,7 @@ Developed as a **Full Stack** project running on a **Home Lab (Linux Server)** u
     Open `http://localhost:8080`
 
 ## 📸 Screenshots
-| Dashboard (Light Mode) | Squad Chat |
+| Dashboard | Squad Chat |
 |:---:|:---:|
 | ![Dash](screenshots/Dashboard.jpg) | ![Squad](screenshots/Squad_hub.jpg) |
 
