@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Username</label>
-                <input type="text" name="username" required placeholder="Vicius" 
+                <input type="text" name="username" required placeholder="" 
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-slate-700 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition font-medium">
             </div>
 
