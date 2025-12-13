@@ -1,39 +1,60 @@
 <?php
-// login.php
-session_start(); // Inicia a sessão para guardarmos quem está logado
+// Configurações de Sessão (Devem estar antes do session_start)
+// Se o utilizador pediu "Manter Logado" num pedido anterior, o cookie já trata disso.
+// Aqui garantimos apenas definições base de segurança.
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+
+session_start();
 require 'includes/db.php';
 
-$message = '';
-
-// Verifica se já vieste redirecionado do registo com sucesso
-if (isset($_GET['status']) && $_GET['status'] === 'registered') {
-    $message = '✅ Conta criada! Agora faz login.';
+// Se já está logado, manda para a dashboard
+if (isset($_SESSION['user_id'])) {
+    header('Location: index.php');
+    exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+$msg = '';
 
-    if (empty($email) || empty($password)) {
-        $message = '❌ Preenche tudo, mano.';
-    } else {
-        // Vamos buscar o user pelo email
-        $stmt = $pdo->prepare("SELECT id, username, password_hash FROM users WHERE email = ?");
-        $stmt->execute([$email]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $login_input = trim($_POST['login_input']); // Pode ser email ou username
+    $password = $_POST['password'];
+    $remember = isset($_POST['remember']); // Checkbox
+
+    if (!empty($login_input) && !empty($password)) {
+        // 1. Procurar por Email OU Username
+        // Usamos a mesma variável $login_input para os dois parâmetros
+        $stmt = $pdo->prepare("SELECT id, username, password_hash, group_id FROM users WHERE email = ? OR username = ?");
+        $stmt->execute([$login_input, $login_input]);
         $user = $stmt->fetch();
 
-        // O Big Bro explica: password_verify compara o texto normal com o HASH na BD
         if ($user && password_verify($password, $user['password_hash'])) {
-            // SUCESSO! Guardar dados na sessão
+            // Login Sucesso! ✅
+            
+            // Lógica do "Manter Logado"
+            if ($remember) {
+                // Estende a sessão por 30 dias
+                $params = session_get_cookie_params();
+                setcookie(session_name(), session_id(), time() + (30 * 24 * 60 * 60), $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+            }
+
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['username'];
             
-            // Redireciona para a Dashboard
+            // Log de atividade se tiver grupo
+            if ($user['group_id']) {
+                require_once 'includes/functions.php'; // Só para o log
+                // logActivity($pdo, $user['group_id'], $user['id'], "Iniciou sessão.", "info");
+                // (Comentei o log para não encher a base de dados de "Entrou/Saiu")
+            }
+
             header('Location: index.php');
             exit;
         } else {
-            $message = '❌ Email ou password errados. Tenta outra vez.';
+            $msg = "❌ Credenciais incorretas (ou piloto errado).";
         }
+    } else {
+        $msg = "⚠️ Preenche todos os campos.";
     }
 }
 ?>
@@ -42,49 +63,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - K-Dream Budgeter</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Login - K-Dream</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f8fafc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="icon" href="https://fav.farm/🇰🇷" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-gray-900 text-white h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
-    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700">
-        <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-blue-500 mb-2">🔑 Entrar</h1>
-            <p class="text-gray-400">Bem-vindo de volta ao K-Dream.</p>
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-200 rounded-full blur-[100px] opacity-60"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-200 rounded-full blur-[100px] opacity-60"></div>
+    </div>
+
+    <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-md relative z-10">
+        
+        <div class="text-center mb-8">
+            <h1 class="font-extrabold text-4xl tracking-tight text-slate-800 mb-2">
+                K-DREAM <span class="text-blue-500">🇰🇷</span>
+            </h1>
+            <p class="text-slate-500 text-sm font-medium">Gere o teu futuro com clareza.</p>
         </div>
 
-        <?php if($message): ?>
-            <div class="p-3 rounded mb-4 text-sm text-center border <?= strpos($message, '✅') !== false ? 'bg-green-500/20 text-green-300 border-green-500/50' : 'bg-red-500/20 text-red-300 border-red-500/50' ?>">
-                <?= $message ?>
+        <?php if($msg): ?>
+            <div class="bg-red-50 border border-red-100 text-red-500 text-sm p-3 rounded-lg mb-6 text-center font-medium">
+                <?= $msg ?>
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="login.php" class="space-y-4">
+        <form method="POST" class="space-y-5">
+            
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
-                <input type="email" name="email" required 
-                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Username ou Email</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-3 text-slate-400">👤</span>
+                    <input type="text" name="login_input" required placeholder="" 
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-700 placeholder-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition font-medium">
+                </div>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                <input type="password" name="password" required 
-                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition">
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-3 text-slate-400">🔒</span>
+                    <input type="password" name="password" required placeholder="••••••••" 
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-slate-700 placeholder-slate-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition font-medium">
+                </div>
             </div>
 
-            <button type="submit" 
-                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded transition duration-200 transform hover:scale-[1.02]">
-                Entrar na Dashboard
+            <div class="flex items-center justify-between text-sm">
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-blue-500 focus:ring-blue-200">
+                    <span class="text-slate-500 group-hover:text-slate-700 transition">Manter sessão iniciada</span>
+                </label>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-slate-300/50 transform transition hover:scale-[1.01] active:scale-95">
+                Entrar
             </button>
         </form>
 
-        <p class="mt-4 text-center text-sm text-gray-400">
-            Ainda não tens conta? <a href="register.php" class="text-blue-400 hover:underline">Regista-te</a>.
-        </p>
+        <div class="mt-8 text-center border-t border-slate-100 pt-6">
+            <p class="text-slate-400 text-sm">Ainda não tens equipa?</p>
+            <a href="register.php" class="text-blue-500 font-bold hover:text-blue-600 transition">Cria a tua conta aqui</a>
+        </div>
     </div>
 
 </body>

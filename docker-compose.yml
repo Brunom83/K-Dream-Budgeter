@@ -37,6 +37,16 @@ services:
     networks:
       - kdream-network
 
+      # --- NOVO SERVIÇO: O TÚNEL ---
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --url http://web:80
+    networks:
+      - kdream-network
+    depends_on:
+      - web
+
 volumes:
   db_data:
 

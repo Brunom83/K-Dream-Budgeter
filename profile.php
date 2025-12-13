@@ -111,40 +111,50 @@ $me = $stmt->fetch();
 <head>
     <meta charset="UTF-8">
     <title>Definições - K-Dream</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f8fafc">
     <link rel="icon" href="https://fav.farm/🇰🇷" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen pb-20">
-    <nav class="bg-gray-800 border-b border-gray-700 p-4">
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-20">
+    
+    <nav class="bg-white border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm mb-6">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="font-black text-xl text-blue-500"><a href="./">K-DREAM 🇰🇷</h1>
-            <a href="index.php" class="text-gray-400 hover:text-white flex items-center gap-2 transition">
-                <span>⬅</span> Voltar
-            </a>
+            <h1 class="font-black text-xl text-slate-800">
+                K-DREAM <span class="text-blue-600">🇰🇷</span>
+            </h1>
+            <div class="flex items-center gap-3">
+                <a href="index.php" class="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-2 rounded-lg hover:bg-slate-200 transition">⬅ Voltar</a>
+                <a href="logout.php" class="text-xs bg-red-50 text-red-500 px-3 py-2 rounded-lg hover:bg-red-100 transition font-bold">
+                    Sair
+                </a>
+            </div>
         </div>
     </nav>
 
-    <div class="max-w-4xl mx-auto p-6 space-y-8">
-        <div class="mb-6">
-            <h2 class="text-3xl font-bold">⚙️ Definições de Conta</h2>
+    <div class="max-w-4xl mx-auto px-4 space-y-8">
+        <div class="mb-2">
+            <h2 class="text-3xl font-bold text-slate-800">⚙️ Definições de Conta</h2>
+            <p class="text-slate-500">Afina o motor da tua conta.</p>
         </div>
 
         <?php if($msg): ?>
-            <div class="p-4 rounded border <?= $msg_type === 'success' ? 'bg-green-500/20 border-green-500 text-green-300' : 'bg-red-500/20 border-red-500 text-red-300' ?>">
+            <div class="p-4 rounded-xl border text-center font-medium shadow-sm animate-bounce <?= $msg_type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700' ?>">
                 <?= $msg ?>
             </div>
         <?php endif; ?>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
             <div class="md:col-span-1 space-y-6">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 text-center">
-                    <div class="w-32 h-32 mx-auto rounded-full overflow-hidden bg-gray-700 border-4 border-gray-600 mb-4 shadow-xl">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <div class="w-32 h-32 mx-auto rounded-full overflow-hidden bg-slate-100 border-4 border-slate-50 mb-4 shadow-lg relative">
                         <?php if($me['avatar_url']): ?>
                             <img src="<?= htmlspecialchars($me['avatar_url']) ?>?t=<?= time() ?>" class="w-full h-full object-cover">
                         <?php else: ?>
-                            <div class="w-full h-full flex items-center justify-center text-4xl font-bold text-gray-500">
+                            <div class="w-full h-full flex items-center justify-center text-4xl font-bold text-slate-300">
                                 <?= strtoupper(substr($me['username'], 0, 1)) ?>
                             </div>
                         <?php endif; ?>
@@ -154,56 +164,56 @@ $me = $stmt->fetch();
                         <label class="block">
                             <span class="sr-only">Escolher foto</span>
                             <input type="file" name="avatar" accept="image/*" required
-                                class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer"/>
+                                class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 cursor-pointer"/>
                         </label>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded font-bold text-sm transition">Carregar Foto</button>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-xl font-bold text-sm transition shadow-md shadow-blue-200">Carregar Foto</button>
                     </form>
                 </div>
             </div>
 
             <div class="md:col-span-2 space-y-6">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 class="font-bold text-lg mb-4 text-blue-400">📝 Dados Pessoais</h3>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 text-blue-600 flex items-center gap-2">📝 Dados Pessoais</h3>
                     <form method="POST" class="space-y-4">
                         <input type="hidden" name="action" value="update_info">
                         <div>
-                            <label class="block text-sm text-gray-400 mb-1">Username</label>
-                            <input type="text" value="<?= htmlspecialchars($me['username']) ?>" disabled class="w-full bg-gray-900/50 border border-gray-600 rounded px-4 py-2 text-gray-500 cursor-not-allowed">
+                            <label class="block text-sm text-slate-500 mb-1 font-medium">Username</label>
+                            <input type="text" value="<?= htmlspecialchars($me['username']) ?>" disabled class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-slate-400 font-medium cursor-not-allowed">
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-400 mb-1">Email</label>
-                            <input type="email" name="email" value="<?= htmlspecialchars($me['email']) ?>" required class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                            <label class="block text-sm text-slate-500 mb-1 font-medium">Email</label>
+                            <input type="email" name="email" value="<?= htmlspecialchars($me['email']) ?>" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-slate-800 focus:border-blue-500 outline-none transition">
                         </div>
                         <div>
-                            <label class="block text-sm text-gray-400 mb-1">Meta Pessoal (€)</label>
-                            <input type="number" name="personal_goal" value="<?= $me['personal_goal'] ?>" required class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                            <label class="block text-sm text-slate-500 mb-1 font-medium">Meta Pessoal (€)</label>
+                            <input type="number" name="personal_goal" value="<?= $me['personal_goal'] ?>" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-slate-800 focus:border-blue-500 outline-none transition font-bold">
                         </div>
                         <div class="text-right">
-                            <button type="submit" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded font-bold transition">Salvar</button>
+                            <button type="submit" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-xl font-bold transition shadow-lg">Salvar Dados</button>
                         </div>
                     </form>
                 </div>
 
-                <div class="bg-gray-800 p-6 rounded-xl border border-red-900/30">
-                    <h3 class="font-bold text-lg mb-4 text-red-400">🔐 Segurança</h3>
+                <div class="bg-white p-6 rounded-2xl border border-red-100 shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 text-red-500 flex items-center gap-2">🔐 Segurança</h3>
                     <form method="POST" class="space-y-4">
                         <input type="hidden" name="action" value="change_password">
                         <div>
-                            <label class="block text-sm text-gray-400 mb-1">Password Atual</label>
-                            <input type="password" name="current_password" required class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                            <label class="block text-sm text-slate-500 mb-1 font-medium">Password Atual</label>
+                            <input type="password" name="current_password" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-slate-800 focus:border-red-400 outline-none transition">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm text-gray-400 mb-1">Nova Password</label>
-                                <input type="password" name="new_password" required class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                                <label class="block text-sm text-slate-500 mb-1 font-medium">Nova Password</label>
+                                <input type="password" name="new_password" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-slate-800 focus:border-red-400 outline-none transition">
                             </div>
                             <div>
-                                <label class="block text-sm text-gray-400 mb-1">Confirmar</label>
-                                <input type="password" name="confirm_password" required class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white">
+                                <label class="block text-sm text-slate-500 mb-1 font-medium">Confirmar</label>
+                                <input type="password" name="confirm_password" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-slate-800 focus:border-red-400 outline-none transition">
                             </div>
                         </div>
                         <div class="text-right">
-                            <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded font-bold transition">Alterar Password</button>
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-xl font-bold transition shadow-md shadow-red-200">Alterar Password</button>
                         </div>
                     </form>
                 </div>

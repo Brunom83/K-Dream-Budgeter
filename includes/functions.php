@@ -19,6 +19,18 @@ function getEurToKrwRate($pdo) {
         }
     }
 
+    // FIX PARA CLOUDFLARE E DOCKER 🛡️
+// Se o pedido vier via HTTPS do Cloudflare, dizemos ao PHP que é seguro.
+    if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+        $_SERVER['HTTPS'] = 'on';
+}
+
+// Configurar Cookies de Sessão para serem mais permissivos entre domínios
+// (Coloca isto antes de session_start() em qualquer ficheiro, ou aqui se incluíres o db.php sempre antes)
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_only_cookies', 1);
+    ini_set('session.cookie_secure', 1); // Força cookie seguro se estiveres em HTTPS
+
     // 2. Se não temos cache recente, vamos à API externa
     // API Free: frankfurter.app (Não precisa de chave API, é top para MVPs)
     try {
