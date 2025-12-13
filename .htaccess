@@ -18,3 +18,8 @@ RewriteRule ^([^\.]+)$ $1.php [NC,L]
     Order Allow,Deny
     Deny from all
 </Files>
+
+# Aumentar limites de upload para 20MB (Fotos de telemóvel são grandes!)
+php_value upload_max_filesize 20M
+php_value post_max_size 20M
+php_value memory_limit 128M

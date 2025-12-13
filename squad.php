@@ -19,18 +19,16 @@ $msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_group') {
     $group_name = trim($_POST['group_name']);
     $group_goal = $_POST['group_goal'];
-    // Gera código tipo "KOREA26"
     $invite_code = strtoupper(substr(md5(time()), 0, 6));
 
     if (!empty($group_name) && !empty($group_goal)) {
         try {
             $pdo->beginTransaction();
-            // Cria o grupo
-            $stmt = $pdo->prepare("INSERT INTO groups (name, group_goal, invite_code, created_by) VALUES (?, ?, ?, ?)");
+            // CORREÇÃO AQUI: `groups`
+            $stmt = $pdo->prepare("INSERT INTO `groups` (name, group_goal, invite_code, created_by) VALUES (?, ?, ?, ?)");
             $stmt->execute([$group_name, $group_goal, $invite_code, $user_id]);
             $new_group_id = $pdo->lastInsertId();
 
-            // Mete o user no grupo
             $stmt = $pdo->prepare("UPDATE users SET group_id = ? WHERE id = ?");
             $stmt->execute([$new_group_id, $user_id]);
             
@@ -48,7 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // 2. ENTRAR GRUPO
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'join_group') {
     $code = trim($_POST['invite_code']);
-    $stmt = $pdo->prepare("SELECT id, name FROM groups WHERE invite_code = ?");
+    // CORREÇÃO AQUI: `groups`
+    $stmt = $pdo->prepare("SELECT id, name FROM `groups` WHERE invite_code = ?");
     $stmt->execute([$code]);
     $group = $stmt->fetch();
 
@@ -68,44 +67,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $new_goal = $_POST['group_goal'];
     $group_id = $_POST['group_id'];
     
-    // Check rápido de segurança (se pertence ao grupo)
-    // Num sistema pro, verificávamos se é Admin, mas para MVP serve.
-    $stmt = $pdo->prepare("UPDATE groups SET group_goal = ? WHERE id = ?");
+    // CORREÇÃO AQUI: `groups`
+    $stmt = $pdo->prepare("UPDATE `groups` SET group_goal = ? WHERE id = ?");
     if ($stmt->execute([$new_goal, $group_id])) {
         logActivity($pdo, $group_id, $user_id, "Alterou a Meta da Squad para " . number_format($new_goal, 0) . "€", "warning");
         $msg = "✅ Meta da Squad atualizada!";
     }
 }
 
-// 4. SAIR DO GRUPO (LEAVE) 🚪
+// 4. SAIR DO GRUPO (LEAVE)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'leave_group') {
     $group_id = $_POST['group_id'];
     
-    // Log antes de sair
     logActivity($pdo, $group_id, $user_id, "Saiu da Squad.", "danger");
 
-    // Remove o ID do grupo do user
     $stmt = $pdo->prepare("UPDATE users SET group_id = NULL WHERE id = ?");
     if ($stmt->execute([$user_id])) {
         $msg = "👋 Saíste da Squad.";
-        // Refresh para atualizar a página
         header("Refresh:0");
         exit;
     }
 }
 
-// 5. APAGAR GRUPO (DELETE) 💣
+// 5. APAGAR GRUPO (DELETE)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_group') {
     $group_id = $_POST['group_id'];
     
-    // Confirmação extra: Só o Admin pode apagar
-    $stmt = $pdo->prepare("SELECT created_by FROM groups WHERE id = ?");
+    // CORREÇÃO AQUI: `groups`
+    $stmt = $pdo->prepare("SELECT created_by FROM `groups` WHERE id = ?");
     $stmt->execute([$group_id]);
     $creator = $stmt->fetchColumn();
 
     if ($creator == $user_id) {
-        // DELETE CASCADE trata dos users (users ficam com group_id NULL)
-        $stmt = $pdo->prepare("DELETE FROM groups WHERE id = ?");
+        // CORREÇÃO AQUI: `groups`
+        $stmt = $pdo->prepare("DELETE FROM `groups` WHERE id = ?");
         $stmt->execute([$group_id]);
         $msg = "💥 Squad eliminada.";
         header("Refresh:0");
@@ -117,7 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 
 // --- DADOS ---
-$stmt = $pdo->prepare("SELECT u.*, g.name as group_name, g.invite_code, g.group_goal, g.created_by as admin_id FROM users u LEFT JOIN groups g ON u.group_id = g.id WHERE u.id = ?");
+// CORREÇÃO AQUI: LEFT JOIN `groups`
+$stmt = $pdo->prepare("SELECT u.*, g.name as group_name, g.invite_code, g.group_goal, g.created_by as admin_id FROM users u LEFT JOIN `groups` g ON u.group_id = g.id WHERE u.id = ?");
 $stmt->execute([$user_id]);
 $me = $stmt->fetch();
 
@@ -125,12 +121,10 @@ $members = [];
 $logs = [];
 
 if ($me['group_id']) {
-    // Buscar membros
     $stmt = $pdo->prepare("SELECT username, personal_goal, avatar_url FROM users WHERE group_id = ?");
     $stmt->execute([$me['group_id']]);
     $members = $stmt->fetchAll();
 
-    // Buscar Logs
     $stmt = $pdo->prepare("
         SELECT l.*, u.username 
         FROM activity_logs l 
@@ -149,9 +143,9 @@ if ($me['group_id']) {
 <head>
     <meta charset="UTF-8">
     <title>Squad Hub - K-Dream</title>
+    <link rel="icon" href="https://fav.farm/🇰🇷" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="https://fav.farm/🇰🇷" />
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-6">
@@ -161,7 +155,7 @@ if ($me['group_id']) {
             <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
                 💎 Squad Hub
             </h1>
-            <a href="index.php" class="text-gray-400 hover:text-white flex items-center gap-2 transition">
+            <a href="index" class="text-gray-400 hover:text-white flex items-center gap-2 transition">
                 <span>⬅</span> Dashboard
             </a>
         </div>
@@ -229,8 +223,12 @@ if ($me['group_id']) {
                             <?php foreach($members as $member): ?>
                                 <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded-lg border border-gray-700/50">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-lg border-2 border-gray-800">
-                                            <?= strtoupper(substr($member['username'], 0, 1)) ?>
+                                        <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-lg border-2 border-gray-800 overflow-hidden">
+                                            <?php if(!empty($member['avatar_url'])): ?>
+                                                <img src="<?= htmlspecialchars($member['avatar_url']) ?>" class="w-full h-full object-cover">
+                                            <?php else: ?>
+                                                <?= strtoupper(substr($member['username'], 0, 1)) ?>
+                                            <?php endif; ?>
                                         </div>
                                         <div>
                                             <div class="font-bold flex items-center gap-2">
@@ -300,7 +298,6 @@ if ($me['group_id']) {
                                 <?php foreach($logs as $log): ?>
                                     <div class="flex gap-3 items-start relative pl-2">
                                         <div class="absolute left-0 top-2 bottom-0 w-[1px] bg-gray-800 -z-10"></div>
-                                        
                                         <div class="mt-1.5 min-w-[8px] h-2 rounded-full ring-4 ring-gray-900 
                                             <?= $log['type'] === 'success' ? 'bg-green-500' : 
                                                ($log['type'] === 'warning' ? 'bg-yellow-500' : 

@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // --- 2. DADOS PARA A DASHBOARD ---
 
 // Dados do User + Grupo
-$stmt = $pdo->prepare("SELECT u.*, g.name as group_name, g.group_goal FROM users u LEFT JOIN groups g ON u.group_id = g.id WHERE u.id = ?");
+$stmt = $pdo->prepare("SELECT u.*, g.name as group_name, g.group_goal FROM users u LEFT JOIN `groups` g ON u.group_id = g.id WHERE u.id = ?");
 $stmt->execute([$user_id]);
 $me = $stmt->fetch();
 
@@ -175,8 +175,23 @@ foreach($chart_data as $d) {
             </div>
             <div class="flex items-center gap-4">
                 <a href="squad" class="text-sm bg-purple-600/20 text-purple-400 px-3 py-1 rounded hover:bg-purple-600/40 transition">Squad</a>
-                <a href="logout" class="text-sm bg-red-500/10 text-red-400 px-3 py-1 rounded hover:bg-red-500/20 transition">Sair</a>
-            </div>
+
+                <div class="flex items-center gap-3">
+    <a href="profile.php" class="flex items-center gap-3 hover:opacity-80 transition group">
+        <div class="w-8 h-8 rounded-full bg-gray-700 overflow-hidden border border-gray-600 group-hover:border-blue-500 transition">
+            <?php if(!empty($me['avatar_url'])): ?>
+                <img src="<?= htmlspecialchars($me['avatar_url']) ?>?t=<?= time() ?>" alt="Avatar" class="w-full h-full object-cover">
+            <?php else: ?>
+                <div class="w-full h-full flex items-center justify-center text-xs font-bold text-gray-300">
+                    <?= strtoupper(substr($user_name, 0, 1)) ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <span class="text-sm text-gray-300 hidden sm:block font-semibold"><?= htmlspecialchars($user_name) ?></span>
+    </a>
+    
+    <a href="logout.php" class="text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded hover:bg-red-500/20 transition ml-2">Sair</a>
+</div>
         </div>
     </nav>
 

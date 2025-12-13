@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # O nosso Site (K-Dream)
+  web:
+    build: .
+    ports:
+      - "8080:80" # Vais aceder em http://ip-do-servidor:8080
+    volumes:
+      - .:/var/www/html # Sincroniza o código: editas no VS Code, muda logo no site!
+    depends_on:
+      - db
+    networks:
+      - kdream-network
+
+  # A Base de Dados
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword # Senha de root (não uses em produção real!)
+      MYSQL_DATABASE: k_dream_budgeter
+      MYSQL_USER: k_dream_user
+      MYSQL_PASSWORD: k_dream_password # A senha que vamos por no db.php
+    volumes:
+      - db_data:/var/lib/mysql # Guarda os dados mesmo se desligares o PC
+    networks:
+      - kdream-network
+
+  # Gestor de BD (Tipo phpMyAdmin)
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8081:8080" # Vais aceder em http://ip-do-servidor:8081
+    networks:
+      - kdream-network
+
+volumes:
+  db_data:
+
+networks:
+  kdream-network:
